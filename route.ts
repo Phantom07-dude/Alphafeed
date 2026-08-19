@@ -1,0 +1,3 @@
+import { NextRequest,NextResponse } from 'next/server'; import {z} from 'zod'; import {searchToken} from '@/lib/providers'; import {guard} from '@/lib/security';
+const q=z.string().trim().min(1).max(80);
+export async function GET(req:NextRequest){const limited=guard(req,'search',20);if(limited)return limited;const p=q.safeParse(req.nextUrl.searchParams.get('q'));if(!p.success)return NextResponse.json({error:'Search query must be 1–80 characters.'},{status:400});try{return NextResponse.json({tokens:await searchToken(p.data)})}catch{return NextResponse.json({tokens:[],error:'Search provider unavailable.'},{status:502})}}
